@@ -1,0 +1,4 @@
+name = My Theming
+description = Module for creating extra page
+version = "7.x-1.0"
+core = "7.x"

@@ -1,0 +1,4 @@
+name = Custom menu
+description = Module for creating extra pages: Home, 404, 403
+version = "7.x-1.0"
+core = "7.x"

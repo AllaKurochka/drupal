@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * @file
+ * Module file for the extra page
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function my_theming_menu() {
+  $items = array();
+
+  $items['my_theming'] = array(
+    'title' => 'My Theming',
+    'description' => 'Usual page',
+    'page callback' => 'my_theming',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+  );
+
+    return $items;
+}
+
+/**
+ * Creates content for page.
+ */
+function my_theming($content = NULL) {
+  $content = theme('item_list', array('items' => array(1, 2, 3, 4)));
+  $content .= theme('new_content', array('result' => 'Some Text'));
+  $content .= theme('new_file', array('result' => 'Some Text'));
+  $content .= theme('another_new_file', array('result' => t('Visit the <a href="@url">settings</a> page', array('@url' => url('admin')))));
+   // Table header
+  $header = array(
+  'fruit' => t('Fruit'),
+  'a' => t('Vitamin A'),
+  'b1' => t('Vitamin B1'),
+  'b2' => t('Vitamin B2'),
+  );
+  // Table rows
+  $rows = array(
+    // Row 1
+    array(
+    'fruit' => t('Apple'),
+    'a' => '98 IU',
+    'b1' => '0.031 mg',
+    'b2' => '0.047 mg',
+    ),
+    // Row 2
+    array(
+    'fruit' => t('Banana'),
+    'a' => '76 IU',
+    'b1' => '0.037 mg',
+    'b2' => '0.086 mg',
+    ),
+    // Row 3
+    array(
+    'fruit' => t('Orange'),
+    'a' => '295 IU',
+    'b1' => '0.114 mg',
+    'b2' => '0.052 mg',
+    ),
+  );
+
+  $content .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => '100%'),));
+
+  $crumbs = '<ul class="breadcrumbs"><li>Vasya</li></ul>';
+  return $content;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function my_theming_theme($existing, $type, $theme, $path){
+    $themes = array();
+    $themes['new_file'] = array(
+      'path' => drupal_get_path('theme', 'mytheme'),
+      'template' => 'new_file',
+      'variables' => array(
+        'result' => NULL,
+        ),
+    );
+    $themes['another_new_file'] = array(
+      'path' => drupal_get_path('theme', 'mytheme'),
+      'template' => 'another_new_file',
+      'variables' => array(
+        'result' => NULL,
+        ),
+    );
+    return $themes;
+}
+
+function theme_new_content($vars) {
+  return "<h2>buuu{$vars['result']}</h2>";
+}

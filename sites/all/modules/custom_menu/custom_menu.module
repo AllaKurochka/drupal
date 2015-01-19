@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Module file for the extra pages, which creates home, 404 and 403 pages.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function custom_menu_menu(){
+  $items = array();
+
+  $items['home'] = array(
+    'title' => 'Home',
+    'description' => 'Usual page',
+    'page callback' => 'main_page',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
+  );
+
+  $items['not_found'] = array(
+    'title' => '404 Page not found',
+    'description' => '404 error',
+    'page callback' => 'page_404',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+  );
+
+  $items['forbidden'] = array(
+    'title' => '403 Forbidden',
+    'description' => '403 error',
+    'page callback' => 'page_403',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+  );
+
+    return $items;
+}
+
+/**
+ * Creates content for main page.
+ */
+function main_page($content = NULL) {
+  $content = 'Some text';
+  return $content;
+}
+
+/**
+ * Creates content for 404 page.
+ */
+function page_404($content = NULL) {
+  $content = 'Check url';
+  return $content;
+}
+
+/**
+ * Creates content for 403 page.
+ */
+function page_403($content = NULL) {
+  $content = '403 Forbidden';
+  return $content;
+}

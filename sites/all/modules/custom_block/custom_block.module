@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * @file
+ * Module file for block
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function custom_block_block_info() {
+  $blocks = array();
+  $blocks['custom_block'] = array(
+    'info' => t('Custom block'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function custom_block_block_configure($delta = '') {
+  $form = array();
+
+  switch ($delta) {
+    case 'custom_block' :
+      // Text field form element
+      $form['text_body'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Enter your text here in WYSIWYG format'),
+        '#default_value' => variable_get('text_variable', ''),
+        );
+
+      // Select file form element
+      $form['file'] = array(
+        '#name' => 'block_image',
+        '#type' => 'managed_file',
+        '#title' => t('Choose an Image File'),
+        '#description' => t('Please select image. Only *.gif, *.png, *.jpg, and *.jpeg images allowed.'),
+        '#default_value' => variable_get('custom_block_image_fid', ''),
+        '#upload_location' => 'public://',
+        '#upload_validators' => array(
+          'file_validate_extensions' => array('gif png jpg jpeg'),
+        ),
+      );
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ */
+function custom_block_block_save($delta  ='', $edit = array()) {
+  switch ($delta) {
+    case 'custom_block' :
+      // Saving the text element value
+      variable_set('text_variable' , $edit['text_body']['value']);
+
+      // Changing file to a permanent state
+      $file = file_load($edit['file']);
+      $file->status = FILE_STATUS_PERMANENT;
+      file_save($file);
+      // Adding usage for file. Saving information about image.
+      $block = block_load('custom_block ', $delta);
+      file_usage_add($file, 'custom_block ', 'block ', $block->bid);
+      variable_set('custom_block_image_fid', $file->fid);
+      break;
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function custom_block_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'custom_block' :
+      $uid = '1';
+      if (user_access('access content')) {
+        $block['content'] = custom_block_view();
+      }
+      else {
+        $block['content'] = 'Access to view this content is denied.';
+      }
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Assemble renderable array for test block content.
+ * @return
+ * returns a renderable array of block content.
+ */
+function custom_block_view() {
+  $block = array();
+
+// Capture the image file path and convert into HTML with some css attributes
+  $image_file = file_load(variable_get('custom_block_image_fid', ''));
+  $image_path = '';
+
+  if (isset($image_file->uri)) {
+    $image_path = $image_file->uri;
+  }
+
+  $image = theme_image(array(
+      'path' => ($image_path),
+      'alt' => t('Image description.'),
+      'title' => t('This is our block image title.'),
+      'attributes' => array('class' => 'class_name'),
+  ));
+
+// Load text from variable
+  $text = variable_get('text_variable', '');
+
+// Block output in HTML with div wrappers around elements
+  $block = array(
+      'message' => array(
+          '#prefix' => '<div>',
+          '#type' => 'markup',
+          '#markup' => $text,
+          '#suffix' => '</div>',
+      ),
+      'image' => array(
+          '#prefix' => '<div>',
+          '#type' => 'markup',
+          '#markup' => $image,
+          '#suffix' => '</div>',
+      ),
+  );
+
+  return $block;
+}
+
+/**
+ * Implements custom_block_init().
+ */
+function custom_block_init() {
+  // Since this file should only be loaded on the front page, it cannot be
+  // declared in the info file.
+  if (drupal_is_front_page()) {
+    drupal_add_css(drupal_get_path('module', 'custom_block') . '/example.css');
+  }
+  drupal_add_js('http://google.com/jsapi');
+  drupal_add_js(drupal_get_path('module', 'custom_block') . '/cdn.js');
+}
+
+/**
+* Implements of hook_node_view().
+*/
+function custom_block_node_view($node, $view_mode, $langcode) {
+  if ($view_mode == 'full') {
+  $node->content['mycontent'] = array(
+    '#prefix' => '<i>',
+    '#type' => 'markup',
+    '#markup' => 'Additional node content',
+    '#suffix' => '</i>',
+    '#weight' => 10,
+    );
+  }
+}
+
+/**
+* Implements of hook_node_access().
+*/
+function custom_block_node_access($node, $op, $account) {
+  if ($op == 'view') {
+    return NODE_ACCESS_DENY;
+  }
+}
